@@ -1,0 +1,16 @@
+{
+ "title": "三國演義",
+ "author": "羅貫中",
+ "lang": "zh",
+ "license": "公版",
+ "source_name": "维基文库",
+ "read_url": "https://zh.wikisource.org/wiki/%E4%B8%89%E5%9C%8B%E6%BC%94%E7%BE%A9",
+ "key": "wikisource-zh:三國演義",
+ "source": "wikisource-zh",
+ "id": "三國演義",
+ "type": "小说",
+ "ruler": "novel_v1",
+ "tags": [],
+ "added": "2026-09-25",
+ "units_total": 120
+}
