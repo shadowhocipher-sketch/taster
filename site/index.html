@@ -1,262 +1,52 @@
 <!doctype html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Je-v-Taster · 试读员</title>
-<style>
-  :root {
-    --bg: #fbfaf7; --fg: #1d1c1a; --mute: #6f6b64; --line: #e4e0d8; --card: #fff;
-    --good: #2f7d4f; --bad: #b3432f; --unsure: #9a8f7c; --accent: #3b5b8c;
-    --e-紧张: #b3432f; --e-好笑: #d49a1c; --e-揪心: #8c3b6e; --e-好奇: #3b5b8c;
-    --e-痛快: #2f7d4f; --e-平淡: #a8a298; --e-困惑: #6f6b64;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #161513; --fg: #ece8e1; --mute: #9c968c; --line: #33302b; --card: #1f1d1a;
-      --good: #5fb883; --bad: #e0735d; --unsure: #8a826f; --accent: #7fa2d6; }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg);
-    font: 16px/1.65 -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
-  main { max-width: 920px; margin: 0 auto; padding: 24px 20px 80px; }
-  a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
-  header { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
-  header .logo { font-size: 22px; font-weight: 700; color: var(--fg); letter-spacing: .5px; }
-  header .logo b { color: var(--accent); }
-  header nav a { margin-right: 14px; color: var(--mute); }
-  .sub { color: var(--mute); font-size: 14px; }
-  form.search { display: flex; gap: 8px; margin: 8px 0 12px; }
-  form.search input { flex: 1; font: inherit; padding: 10px 14px; border: 1px solid var(--line);
-    border-radius: 10px; background: var(--card); color: var(--fg); }
-  form.search button { font: inherit; padding: 0 18px; border: 0; border-radius: 10px;
-    background: var(--accent); color: #fff; cursor: pointer; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-  .chip { font-size: 14px; padding: 3px 12px; border: 1px solid var(--line); border-radius: 99px;
-    color: var(--fg); background: var(--card); }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
-  .card h3 { margin: 0 0 4px; font-size: 18px; }
-  .tags span { font-size: 12px; color: var(--mute); border: 1px solid var(--line); border-radius: 6px;
-    padding: 0 6px; margin-right: 6px; }
-  h2 { font-size: 20px; margin: 28px 0 8px; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--mute); font-weight: 500; }
-  .v { font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .good { color: var(--good); } .bad { color: var(--bad); } .unsure { color: var(--unsure); }
-  .emo { display: inline-block; padding: 0 8px; border-radius: 6px; color: #fff; font-size: 13px; }
-  .strip { display: flex; gap: 2px; margin: 8px 0 4px; }
-  .strip i { flex: 1; height: 18px; border-radius: 2px; background: var(--line); }
-  .legend { font-size: 13px; color: var(--mute); display: flex; flex-wrap: wrap; gap: 10px; }
-  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; }
-  svg text { fill: var(--mute); font-size: 11px; }
-  .note { font-size: 13px; color: var(--mute); border-left: 3px solid var(--line); padding-left: 10px; }
-  footer { margin-top: 48px; font-size: 13px; color: var(--mute); }
-  code { font-size: 13px; }
-</style>
+<meta name="color-scheme" content="light dark">
+<!-- 来源数据都不可信：脚本只许本站文件；图片、查询可以连外站 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https: http: data:; connect-src 'self' https:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Taster 试读员：一次查多家公开书库；书架上的书每一章都有第三方判断模型的读数。只有读数，没有观点。">
+<title>Taster 试读员</title>
+<link rel="canonical" href="https://keepexperiencing.github.io/taster/">
+<!-- 分享卡片：og.png 1200×630、favicon.svg 都放在 site/ 下，同源，CSP 的 img-src 'self' 已放行 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Taster 试读员">
+<meta property="og:title" content="Taster 试读员">
+<meta property="og:description" content="一次查多家公开书库；书架上的书每一章都有第三方判断模型的读数。只有读数，没有观点。">
+<meta property="og:url" content="https://keepexperiencing.github.io/taster/">
+<meta property="og:image" content="https://keepexperiencing.github.io/taster/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Taster 试读员">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main>
-  <header>
-    <a class="logo" href="#/">Je·v·<b>Taster</b> 试读员</a>
-    <nav><a href="#/">找书</a><a href="#/rank">排行</a><a href="#/about">怎么读的</a></nav>
-  </header>
-  <div id="app"></div>
-  <footer id="foot"></footer>
+<a class="skip" href="#main" id="skip">跳到正文</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#/">Taster<span>试读员</span></a>
+    <nav aria-label="主导航">
+      <a href="#/" data-nav="home">找资源</a>
+      <a href="#/rank" data-nav="rank">排行</a>
+      <a href="#/about" data-nav="about">怎么读的</a>
+    </nav>
+  </div>
+</header>
+<main id="main" tabindex="-1">
+  <div id="app"><div class="wrap"><p class="sub">加载中…</p>
+    <noscript><p>这个站需要 JavaScript 才能搜索和显示读数。</p></noscript></div></div>
 </main>
+<footer id="foot"></footer>
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<div id="live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 <script src="data.js"></script>
-<script>
-"use strict";
-const D = window.TASTER;
-const PASS = 0.65, FAIL = 0.35;           // 与走查同一把尺：中间 = 拿不准
-const EMOS = ["紧张", "好笑", "揪心", "好奇", "痛快", "平淡", "困惑"];
-// 搜索里的口语 → 尺上的题。只做同义词映射，不做任何判断
-const ALIAS = {
-  "想看下一章": ["抓人", "上头", "停不下来", "追更", "一口气"],
-  "继续读": ["开头好", "入坑", "开篇"],
-  "中途放下": ["弃书", "劝退", "读不下去", "难啃"],
-  "跟得上": ["好懂", "易读", "不迷路", "入门"],
-  "喜欢主角": ["主角", "人设"],
-};
-const $ = s => document.querySelector(s);
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const pct = p => Math.round(p * 100) + "%";
-
-// ---------- 读数 → 人话（固定模板，不加观点）
-function reading(ruler, k, a) {
-  const m = ruler["题"][k];
-  if (!a) return { text: "未试读", cls: "unsure" };
-  if (a.type === "noul") {
-    const p = a.noul, yes = p >= PASS, no = p <= FAIL;
-    const good = m["坏"] === "高" ? no : yes, bad = m["坏"] === "高" ? yes : no;
-    return { text: pct(p) + (yes ? " · 是" : no ? " · 否" : " · 拿不准"),
-             cls: good ? "good" : bad ? "bad" : "unsure", sure: yes || no, val: p };
-  }
-  if (a.type === "score") {
-    const max = Object.keys(a.legend).length - 1, lab = a.legend[String(Math.round(a.score))];
-    if (a.confidence < 0.5) return { text: "拿不准（信心 " + a.confidence.toFixed(2) + "）", cls: "unsure", sure: false };
-    return { text: "≈ " + lab + "（" + a.score.toFixed(1) + "/" + max + "）", cls: a.score / max >= PASS ? "good" : a.score / max <= FAIL ? "bad" : "unsure",
-             sure: true, val: a.score / max };
-  }
-  const top = Object.entries(a.probabilities).sort((x, y) => y[1] - x[1]);
-  if (top[0][1] < 0.4) return { text: "拿不准（" + top.slice(0, 2).map(t => t[0] + " " + pct(t[1])).join(" / ") + "）", cls: "unsure", sure: false };
-  return { html: emo(top[0][0]) + " " + pct(top[0][1]), sure: true, choice: top[0][0], val: top[0][1] };
-}
-function emo(e) { return '<span class="emo" style="background:var(--e-' + e + ')">' + esc(e) + "</span>"; }
-function cell(r) { return r.html ? r.html : '<span class="' + r.cls + '">' + esc(r.text) + "</span>"; }
-function sentence(ruler, k, a) {       // 「读完会想立刻看下一章：82% · 是」
-  return esc(ruler["题"][k]["说法"]) + "：" + cell(reading(ruler, k, a));
-}
-
-// ---------- 数据工具
-const rulerOf = r => D.rulers[r.ruler];
-const readUnits = r => r.units.filter(u => u.answers);
-function allUnits() {
-  return D.resources.flatMap(r => readUnits(r).map(u => ({ r, u })));
-}
-function avg(xs) { return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null; }
-
-// ---------- 页面
-function home(q) {
-  const res = q ? search(q) : null;
-  let h = `<p class="sub">搜书名、作者、题材，或者搜一种感受（揪心、好笑、紧张……）。
-    每一章都有人替你先读过——这里只放读数，不放观点。</p>
-    <form class="search" onsubmit="location.hash='#/s/'+encodeURIComponent(this.q.value.trim());return false">
-      <input name="q" value="${esc(q || "")}" placeholder="三国 / 揪心 / 抓人 / 赤壁……" autofocus>
-      <button>找</button></form>
-    <div class="chips">${EMOS.slice(0, 5).map(e => `<a class="chip" href="#/rank/感受:${e}">最${e}的章</a>`).join("")}
-      <a class="chip" href="#/rank/想看下一章">最抓人的章</a><a class="chip" href="#/rank/中途放下">最容易弃的章</a></div>`;
-  if (res) {
-    if (res.redirect) { location.hash = res.redirect; return ""; }
-    h += `<h2>「${esc(q)}」</h2>`;
-    if (!res.books.length && !res.units.length) h += `<p class="sub">没找到。目前书架上只有 ${D.resources.length} 个资源。</p>`;
-    h += res.books.map(bookCard).join("");
-    if (res.units.length) h += `<h2>章节里提到的</h2>` + unitTable(res.units);
-  } else {
-    h += `<h2>书架</h2>` + D.resources.map(bookCard).join("");
-  }
-  return h;
-}
-function search(q) {
-  const s = q.toLowerCase();
-  for (const e of EMOS) if (s === e || s === "最" + e) return { redirect: "#/rank/感受:" + e };
-  for (const [k, al] of Object.entries(ALIAS)) if (s === k || al.includes(s)) return { redirect: "#/rank/" + k };
-  const hay = r => [r.title, r.title_zhs, r.author, r.author_zhs, r.era, r.type, ...(r.tags || [])].join(" ").toLowerCase();
-  const books = D.resources.filter(r => hay(r).includes(s));
-  const units = allUnits().filter(({ u }) => (u.title || "").toLowerCase().includes(s));
-  return { books, units };
-}
-function bookCard(r) {
-  const ru = rulerOf(r), done = readUnits(r);
-  const want = avg(done.map(u => u.answers["想看下一章"]?.noul).filter(v => v != null));
-  return `<div class="card"><h3><a href="#/r/${r.id}">${esc(r.title)}</a> <span class="sub">${esc(r.author)} · ${esc(r.era || "")} · ${esc(r.type)}</span></h3>
-    <div class="tags">${(r.tags || []).map(t => `<span>${esc(t)}</span>`).join("")}</div>
-    <p class="sub">共 ${r.units.length} 章，已试读 ${done.length} 章${want != null ? "；平均「读完想立刻看下一章」" + pct(want) : ""}</p>
-    ${strip(r)}</div>`;
-}
-function strip(r) {           // 每章一格，颜色 = 主要感受；灰 = 未试读或拿不准
-  const ru = rulerOf(r);
-  if (!ru["题"]["主要感受"]) return "";
-  return `<div class="strip">${r.units.map(u => {
-    const x = u.answers && reading(ru, "主要感受", u.answers["主要感受"]);
-    const c = x && x.choice ? `var(--e-${x.choice})` : "var(--line)";
-    return `<i title="${esc(u.label)} ${esc(u.title)}${x ? " · " + esc(x.choice || "拿不准") : " · 未试读"}" style="background:${c}"></i>`;
-  }).join("")}</div>`;
-}
-function unitTable(rows) {
-  const keys = ["想看下一章", "中途放下", "跟得上", "主要感受"];
-  return `<table><tr><th>章</th>${keys.map(k => `<th>${k}</th>`).join("")}</tr>${rows.map(({ r, u }) => {
-    const ru = rulerOf(r);
-    return `<tr><td><a href="#/r/${r.id}/${u.n}">${esc(r.title)} · ${esc(u.label)}</a><br><span class="sub">${esc(u.title)}</span></td>
-      ${keys.map(k => `<td class="v">${ru["题"][k] ? cell(reading(ru, k, u.answers[k])) : "—"}</td>`).join("")}</tr>`;
-  }).join("")}</table>`;
-}
-function curve(r, k) {        // 一条线：每章 Jev 的原始概率；虚线 = 0.65 / 0.35 两条判定线
-  const us = r.units, W = 880, H = 180, P = 28;
-  const x = i => P + (W - 2 * P) * (us.length > 1 ? i / (us.length - 1) : .5), y = v => H - P - (H - 2 * P) * v;
-  let path = "", dots = "", pen = "M";          // 没试读的章断开线
-  us.forEach((u, i) => {
-    const a = u.answers && u.answers[k]; if (!a || a.type !== "noul") { pen = "M"; return; }
-    path += pen + x(i).toFixed(1) + "," + y(a.noul).toFixed(1); pen = "L";
-    dots += `<a href="#/r/${r.id}/${u.n}"><circle cx="${x(i)}" cy="${y(a.noul)}" r="3.5" fill="var(--accent)"><title>${esc(u.label)} ${pct(a.noul)}</title></circle></a>`;
-  });
-  const gl = v => `<line x1="${P}" x2="${W - P}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-dasharray="4 4"/><text x="0" y="${y(v) + 4}">${v}</text>`;
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${gl(PASS)}${gl(FAIL)}
-    <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2"/>${dots}
-    <text x="${P}" y="${H - 6}">第1章</text><text x="${W - P - 40}" y="${H - 6}">第${us.length}章</text></svg>`;
-}
-function book(id, n) {
-  const r = D.resources.find(x => x.id === id); if (!r) return "<p>没有这个资源。</p>";
-  const ru = rulerOf(r);
-  if (n) return unitPage(r, r.units.find(u => u.n === +n));
-  const done = readUnits(r);
-  const emoCount = {}; done.forEach(u => { const x = reading(ru, "主要感受", u.answers["主要感受"]); const c = x.choice || "拿不准"; emoCount[c] = (emoCount[c] || 0) + 1; });
-  return `<h2>${esc(r.title)}</h2><p class="sub">${esc(r.author)} · ${esc(r.era || "")} · ${esc(r.type)} · ${esc(r.license)}
-    ${r.read_url ? ` · <a href="${esc(r.read_url)}" target="_blank" rel="noopener">读原文 ↗</a>` : ""}</p>
-    <p>共 ${r.units.length} 章，已试读 ${done.length} 章。</p>
-    <h2>每章「读完会想立刻看下一章」</h2>${curve(r, "想看下一章")}
-    <p class="note">每个点是一章的原始概率。虚线上方 = 是，下方 = 否，两线之间 = 拿不准。断开的地方是还没试读的章。</p>
-    <h2>每章的主要感受</h2>${strip(r)}
-    <div class="legend">${Object.entries(emoCount).sort((a, b) => b[1] - a[1]).map(([e, c]) =>
-      `<span><i style="background:${e === "拿不准" ? "var(--line)" : "var(--e-" + e + ")"}"></i>${esc(e)} ${c} 章</span>`).join("")}</div>
-    <h2>逐章</h2>${unitTable(done.map(u => ({ r, u })))}`;
-}
-function unitPage(r, u) {
-  if (!u) return "<p>没有这一章。</p>";
-  const ru = rulerOf(r);
-  return `<p class="sub"><a href="#/r/${r.id}">← ${esc(r.title)}</a></p><h2>${esc(u.label)}　${esc(u.title)}</h2>
-    ${u.url ? `<p><a href="${esc(u.url)}" target="_blank" rel="noopener">读这一章原文 ↗</a></p>` : ""}
-    ${u.answers ? `<table>${Object.keys(ru["题"]).map(k => `<tr><td>${sentence(ru, k, u.answers[k])}</td>
-      <td class="sub">问的是：${esc(ru["题"][k].q.instructions)}</td></tr>`).join("")}</table>
-    <p class="note">送出 ${u["送出字数"]?.toLocaleString()} 字 / 全章 ${u["字数"]?.toLocaleString()} 字 · ${esc(u.utc)} · 尺 ${esc(ru["版本"])}（${esc(ru["指纹"])}）· ${esc(ru["模型"])}</p>`
-      : `<p class="sub">这一章还没试读。</p>`}`;
-}
-function rank(dim) {
-  const dims = [...Object.keys(ALIAS), ...EMOS.map(e => "感受:" + e)];
-  let h = `<div class="chips">${dims.map(d => `<a class="chip" href="#/rank/${encodeURIComponent(d)}"${d === dim ? ' style="border-color:var(--accent)"' : ""}>${esc(d.replace("感受:", "最"))}</a>`).join("")}</div>`;
-  if (!dim) return h + `<p class="sub">选一个维度。</p>`;
-  let rows;
-  if (dim.startsWith("感受:")) {
-    const e = dim.slice(3);
-    rows = allUnits().map(x => ({ ...x, rd: reading(rulerOf(x.r), "主要感受", x.u.answers["主要感受"]) }))
-      .filter(x => x.rd.choice === e).sort((a, b) => b.rd.val - a.rd.val);
-    h += `<h2>主要感受是「${esc(e)}」的章</h2><p class="sub">只列试读员判得出的（最高概率 ≥ 40%），按这个感受的概率排。</p>`;
-  } else {
-    rows = allUnits().filter(x => rulerOf(x.r)["题"][dim]).map(x => ({ ...x, rd: reading(rulerOf(x.r), dim, x.u.answers[dim]) }))
-      .filter(x => x.rd.sure && (x.rd.val >= PASS)).sort((a, b) => b.rd.val - a.rd.val);
-    const m = D.rulers[D.resources[0].ruler]["题"][dim];
-    h += `<h2>${esc(m ? m["说法"] : dim)}：判为「是」的章</h2><p class="sub">只列 ≥ ${PASS} 的，按概率从高到低。拿不准的不上榜。</p>`;
-  }
-  return h + (rows.length ? unitTable(rows.slice(0, 50)) : `<p class="sub">暂时没有。</p>`);
-}
-function about() {
-  return `<h2>这里的数是怎么来的</h2>
-    <p>每一章原文送给一个第三方判断模型，问一组固定的问题。模型只回数字：是非题回 0~1 的概率，打分题回分数和信心，选择题回每个选项的概率。
-    页面上的文字是把这些数字<b>按固定模板</b>翻成人话，没有任何人或模型另写评语。</p>
-    <ul><li>是非题：≥ ${PASS} 记「是」，≤ ${FAIL} 记「否」，中间记「拿不准」。</li>
-    <li>打分题：信心 &lt; 0.5 记「拿不准」。选择题：最高概率 &lt; 40% 记「拿不准」。拿不准的不进排行。</li>
-    <li>同一题重跑，噪音约 ±0.04；两章相差不到 0.1，当作一样。</li>
-    <li>问题的措辞一个字都不改——换措辞，同一章的分数能差 0.7。要改就换一把新尺，全部重读。</li></ul>
-    ${Object.values(D.rulers).map(ru => `<h2>尺 ${esc(ru["版本"])}</h2>
-      <p class="sub">适用：${esc(ru["适用"])} · 模型 <code>${esc(ru["模型"])}</code> · 每章最多送 ${ru["截断字数"]} 字 · 指纹 <code>${esc(ru["指纹"])}</code></p>
-      <table>${Object.entries(ru["题"]).map(([k, m]) => `<tr><td>${esc(k)}</td><td>${esc(m.q.instructions)}${m.q.criteria ?
-        "<br><span class='sub'>" + esc(Array.isArray(m.q.criteria) ? m.q.criteria.join(" → ") : Object.keys(m.q.criteria).join(" / ")) + "</span>" : ""}</td></tr>`).join("")}</table>`).join("")}
-    <h2>版权</h2><p>本站只放读数、章名和指向原文的链接。公版书链到维基文库等公开书库；有版权的书只放读数，不放正文。</p>`;
-}
-
-function route() {
-  const [, p, a, b] = decodeURIComponent(location.hash).split("/");
-  let h;
-  if (p === "r") h = book(a, b);
-  else if (p === "s") h = home(a);
-  else if (p === "rank") h = rank(a);
-  else if (p === "about") h = about();
-  else h = home();
-  if (h) $("#app").innerHTML = h;
-  window.scrollTo(0, 0);
-}
-$("#foot").innerHTML = D ? `数据 ${esc(D.built)} 生成 · 只有读数，没有观点 · <a href="#/about">方法与题目</a>` : "";
-if (!D) $("#app").innerHTML = "<p>缺 data.js——先跑 <code>python tools/build.py</code>。</p>";
-else { addEventListener("hashchange", route); route(); }
-</script>
+<script src="zh.js"></script>
+<script src="connectors.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

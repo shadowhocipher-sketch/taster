@@ -19,9 +19,19 @@ GitHub Actions   │  build.py
 | 来源 id | 编号 | 例 | 能试读 |
 |---|---|---|---|
 | `wikisource-zh` | 作品主页面标题（原样，繁体就繁体） | `wikisource-zh:三國演義` | ✅ |
-| `wikisource-en` | 作品主页面标题（空格不转 `_`） | `wikisource-en:Pride and Prejudice` | ✅ |
-| `gutenberg` | 电子书编号 | `gutenberg:1342` | ✅（Gutendex `copyright === false` 才行） |
-| 其他（openlibrary、archive、openalex…） | 该来源的 id | `openlibrary:OL45883W` | ❌ 只列出、不试读 |
+| `wikisource-en` | 作品主页面标题（空格不转 `_`；多版本页要用具体版本） | `wikisource-en:Pride and Prejudice (1813)` | ✅ |
+| `gutenberg` | 电子书编号 | `gutenberg:1342` | ✅ 只在「全球稳妥公版」时（见下） |
+| 其他（openlibrary、archive、openalex、ctext…） | 该来源的 id | `openlibrary:OL45883W` | ❌ 只列出、不试读 |
+
+**Gutenberg 许可规则**（`gutenberg.py` 与 `connectors.js` 必须一致）：Gutendex `copyright` 为 true → 版权；null → 未知；
+false 时每位作者须满足「死于 1955 年及以前」或「卒年不详且生于 1850 年及以前」（没有作者也算过）→ 公版、可试读；
+否则 → **美国公版**：只在美国是公版，列出、不试读。
+
+**编号字符规则**（`tools/request.py` 的 `validate_key` 是唯一裁判，`connectors.js`、`app.js` 各抄一份只做前挡）：
+各种文字的字母数字 + `_ .,'’·・()（）:：!！?？&、，—–「」『』-`；gutenberg 只许 `[1-9][0-9]{0,6}`；≤ 200 字；
+不许首尾空白、不许以 `.` `-` 开头、不许 Windows 设备名（CON/AUX/NUL/COM1…）。
+维基文库的键会先问一次 API 换成规范标题（跟重定向、只收主命名空间），`三国演义` → `三國演義`。
+过不了规则的书照样列出，只是没有「请试读」按钮（书名带《》“”的维基文库作品目前就是这样）。
 
 ## 2. 搜索结果（JS `Resource`，所有连接器统一返回这个形状）
 
@@ -34,15 +44,15 @@ GitHub Actions   │  build.py
   title: "Pride and Prejudice",
   authors: ["Jane Austen"],
   year: 1813,                     // 首次出版年，不知道就 null
-  lang: "en",                     // ISO 639-1；中文一律 "zh"
+  lang: "en",                     // ISO 639-1；中文一律 "zh"；来源不说就 null
   kind: "book",                   // book | paper | course | audio | video | other
   fiction: true,                  // true | false | null（不知道）
-  license: "公版",                // 公版 | 自由许可 | 开放获取 | 版权 | 未知
+  license: "公版",                // 公版 | 自由许可 | 美国公版 | 开放获取 | 版权 | 未知
   access: "read",                 // read（可直接全文读）| borrow | preview | metadata
   url: "https://…",               // 去来源看这个资源的页面
   cover: "https://…" | null,
   blurb: "…" | null,              // 来源自带的简介原文，≤ 200 字截断。🔴 不许生成、不许改写
-  tasteable: true                 // key 非空 && license ∈ {公版, 自由许可} && kind === "book"
+  tasteable: true                 // key 非空 && license ∈ {公版, 自由许可} && kind === "book"（美国公版不算）
 }
 ```
 
@@ -77,7 +87,7 @@ window.TASTER = {
 - 是非题（noul）：`p ≥ 0.65` 记「是」，`p ≤ 0.35` 记「否」，中间「拿不准」。颜色按「坏」的方向：坏=高 的题，「是」是红。
 - 打分题（score）：`confidence < 0.5` 记「拿不准」，否则「≈ 标签（分/满分）」。
 - 选择题（choice）：最高概率 `< 0.4` 记「拿不准（前两名）」，否则「选项 概率」。
-- 拿不准的不进排行，不算平均。
+- 拿不准的不进排行，不算平均。**判得出的章不到已读章的一半，就不给平均数**，只写「拿不准」和 是/否/拿不准 各几章（2026-09-25 定：三国「中途放下」10 章只有 2 章判得出，平均这 2 章显示 34%，像结论其实不是）。
 - 🔴 只有读数和翻译，**没有观点**：不写评语、不写「推荐理由」、不生成简介。
 - 🔴 站上**不点名判断模型的供应商和模型名**（客户协议 §16.4），只写「第三方判断模型」+ 版本号。
 
@@ -87,8 +97,14 @@ window.TASTER = {
 - 前端「请试读」按钮 = 预填链接：
   `https://github.com/Keepexperiencing/taster/issues/new?template=taste.yml&title=试读：<书名>&key=<资源键>`（都做 encodeURIComponent）
 - 谁能触发真跑：仓库主人开的 Issue 直接跑；别人开的，等主人加标签 `批准` 再跑（只有维护者能加标签——这就是花钱闸门）。
-- 单次上限 200 章（`taste.py --max-calls`）；没读完就留 Issue 开着，再加一次 `批准` 接着读。
-- key 放在仓库 Secrets：`TASTER_API_KEY`；可选变量 `TASTER_ENDPOINT`。
+- `taste.yml` 分两个 job：
+  - `estimate`：外人开的 Issue → 只预估（不调模型；正文不落盘，但 Gutenberg、维基文库单页作品要把全文读进内存才切得出目录），没有密钥、只读仓库、不进排队组。
+  - `taste`：主人开的或加了 `批准` → 真跑，有密钥和写权限，按 Issue 各自排队（`taste-<Issue 号>`），推送冲突靠 rebase 重试。
+- 「读过」全站一个定义（`core.is_read`）：当前尺下有读数、章名对得上目录。请求只读**没读过**的章，读过的正文变了也不重读（评论里会列出来），批准多少就读多少。
+- 批准的必须是预估过的那个键：机器人评论末尾埋 `<!-- taster-key: … -->`，加 `批准` 时键对不上（Issue 被改过）就只重新预估、撤掉 `批准`。
+- 单次上限 200 章、100 分钟（`request.py`）；没读完留 Issue 开着，再加一次 `批准` 接着读。推不上去的读数存成 Actions 附件，不白花钱。
+- 试读用 `GITHUB_TOKEN` 推的提交不触发 push，所以 `pages.yml` 另挂 `workflow_run`，读完重新发布。
+- key 放在仓库 Secrets：`TASTER_API_KEY`；可选变量 `TASTER_ENDPOINT`。标签要先建好：`试读请求`、`批准`、`已试读`。
 
 ## 6. 红线
 

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<!-- 社交分享图（1200×630）的模板。tools/og/render.mjs 用无头浏览器截成 site/og.png。
+     曲线和色格用书架上的真读数画（data.js），不写任何数字以外的评价。 -->
+<style>
+  :root { --brand: #0d366b; --frame: #eda100; --ink: #0b0b0b; --ink-2: #52514e; --grid: #e1e0d9; --s1: #2a78d6;
+          --e1: #2a78d6; --e2: #eb6834; --e3: #1baf7a; --e4: #eda100; --e5: #e87ba4; --e6: #008300; --e7: #4a3aa7; --eu: #c3c2b7; }
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 1200px; height: 630px; overflow: hidden; background: #fcfcfb; color: var(--ink);
+         font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif; }
+  .bar { height: 236px; background: var(--brand); color: #fff; padding: 56px 72px 0; }
+  .bar h1 { font-size: 72px; font-weight: 800; letter-spacing: 1px; line-height: 1; }
+  .bar h1 span { font-weight: 400; opacity: .92; margin-left: 14px; }
+  .bar p { margin-top: 18px; font-size: 30px; opacity: .95; }
+  .frame { position: absolute; left: 72px; right: 72px; top: 210px; height: 52px; border: 4px solid var(--frame);
+           border-radius: 10px; background: #fff; padding: 0 20px; display: flex; align-items: center;
+           font-size: 22px; color: var(--ink-2); }
+  .frame b { margin-left: auto; background: #1c5cab; color: #fff; font-size: 20px; padding: 6px 18px; border-radius: 6px; }
+  .body { padding: 70px 72px 0; display: grid; grid-template-columns: 1fr 300px; gap: 48px; }
+  .lab { font-size: 20px; color: var(--ink-2); margin-bottom: 10px; }
+  svg text { font-size: 15px; fill: #898781; }
+  .emo { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin: 6px 52px 0 16px; }
+  .emo i { height: 20px; border-radius: 3px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 10px 0 0 16px; font-size: 18px; color: var(--ink-2); }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .side { border-left: 1px solid var(--grid); padding-left: 32px; }
+  .side .k { font-size: 20px; color: var(--ink-2); }
+  .side .v { font-size: 26px; font-weight: 700; margin: 4px 0 18px; }
+  .foot { position: absolute; left: 72px; bottom: 24px; font-size: 20px; color: #1c5cab; }
+  .foot span { color: var(--ink-2); margin-left: 16px; }
+</style>
+</head>
+<body>
+  <div class="bar"><h1>Taster<span>试读员</span></h1><p>搜一本书，先看每一章读起来怎么样</p></div>
+  <div class="frame">书名、作者、一种感受……<b>搜索</b></div>
+  <div class="body">
+    <div>
+      <div class="lab" id="lab"></div>
+      <svg id="curve" width="708" height="130"></svg>
+      <div class="emo" id="emo"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="side">
+      <div class="k">只有</div><div class="v">读数</div>
+      <div class="k">没有</div><div class="v">观点</div>
+      <div class="k">背后连着</div><div class="v">7 家公开书库</div>
+    </div>
+  </div>
+  <div class="foot">keepexperiencing.github.io/taster<span>开源 · 纯静态 · 不记录搜索</span></div>
+<script src="../../site/data.js"></script>
+<script>
+  // 🔴 别用 top 当变量名：它是 window.top，const top 直接报错、整张图空白（2026-09-25）
+  // 取书架上第一本有读数的书：画「读完会想立刻看下一章」的原始概率和每章主要感受
+  const D = window.TASTER, r = D.shelf.find(x => x.units.some(u => u.answers)), us = r.units.filter(u => u.answers);
+  document.getElementById("lab").textContent = `《${r.title}》前 ${us.length} 章 · 读完会想立刻看下一章（每点一章）`;
+  const W = 708, H = 130, P = 16, R = 52, x = i => P + (W - P - R) * i / Math.max(1, us.length - 1), y = v => H - P - (H - 2 * P) * v;
+  const pts = us.map((u, i) => [x(i), y(u.answers["想看下一章"].noul)]);
+  const g = [0.35, 0.65].map(v => `<line x1="${P}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e1e0d9" stroke-dasharray="5 5"/><text x="${W - R + 8}" y="${y(v) + 5}">${v}</text>`).join("");
+  document.getElementById("curve").innerHTML = g +
+    `<polyline points="${pts.map(p => p.join(",")).join(" ")}" fill="none" stroke="#2a78d6" stroke-width="3"/>` +
+    pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#fff" stroke="#2a78d6" stroke-width="2.5"/>`).join("");
+  const EMO = ["紧张", "好笑", "揪心", "好奇", "痛快", "平淡", "困惑"];
+  const topEmo = u => { const t = Object.entries(u.answers["主要感受"].probabilities).sort((a, b) => b[1] - a[1])[0]; return t[1] < 0.4 ? null : t[0]; };
+  const col = e => e ? `var(--e${EMO.indexOf(e) + 1})` : "var(--eu)";
+  document.getElementById("emo").innerHTML = us.map(u => `<i style="background:${col(topEmo(u))}"></i>`).join("");
+  const seen = [...new Set(us.map(topEmo))];
+  document.getElementById("legend").innerHTML = seen.map(e => `<span><i style="background:${col(e)}"></i>${e || "拿不准"}</span>`).join("");
+</script>
+</body>
+</html>

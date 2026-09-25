@@ -1,0 +1,38 @@
+# 「请试读」表单。字段 id 是接口（ARCHITECTURE §5）：站上的按钮用 ?template=taste.yml&key=… 预填，
+# tools/request.py 按标签名「资源键」「类型」从渲染后的正文里取值——改 id 或 label 两边一起改。
+name: 请试读
+description: 请试读员逐章试读一个公版 / 自由许可的资源
+title: "试读："
+labels: ["试读请求"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        每一章送给第三方判断模型问一组固定的题，读数上站。只收公版 / 自由许可的资源；有版权的只列出、不试读。
+        仓库主人以外的人提的请求，要等维护者加「批准」标签才开始读；预估出来之后再改资源键，批准时只会重新预估、不开读。
+        单次最多 200 章，没读完的下次接着读。
+  - type: input
+    id: key
+    attributes:
+      label: 资源键
+      description: "格式「来源:编号」。例：wikisource-zh:三國演義、wikisource-en:Pride and Prejudice (1813)、gutenberg:1342（英文维基文库要写具体版本的页名，不带年份的「Pride and Prejudice」是版本列表页）。维基文库只收正文里的作品页（用户页、讨论页、沙盒不收）。站上搜索结果的「请试读」按钮会自动填好。"
+      placeholder: "wikisource-zh:三國演義"
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: 类型
+      description: 决定用哪把尺。目前只有小说。
+      options:
+        - 小说
+      default: 0
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: 备注
+      description: 选填。不参与试读。
+    validations:
+      required: false

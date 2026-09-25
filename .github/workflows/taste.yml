@@ -1,0 +1,204 @@
+# 「请试读」Issue → tools/request.py（拉正文、试读、打包）→ 读数提交回仓库 → 回评论。约定见 ARCHITECTURE §5。
+# 花钱闸门：仓库主人开的 Issue 直接跑；别人开的只回预估，等维护者加「批准」标签（只有维护者能加标签）。
+# 🔴 github.event 里的标题、正文、标签名、评论都是外人写的：一律不进 run: 脚本。
+#    request.py 自己读 $GITHUB_EVENT_PATH；这里只用 GitHub 自己填的数字和步骤输出（2026-09-25）
+# 🔴 分两个 job。外人开 Issue 只进 estimate：没密钥、不能写仓库、不进 taste 的排队组。
+#    同一个 concurrency 组里排队位只有一个，新来的会把在排的顶掉（被顶的一步都不跑、也不留评论）。
+#    所以 taste 的组按 Issue 分（taste-<编号>）：第二个已批准的请求不会把第一个顶掉；同一个 Issue 连加两次「批准」
+#    才会顶，顶掉的也是同一个请求。不同 Issue 并行跑，同时推送靠「提交读数」里的拉新 + rebase 重试（2026-09-25）
+#    代价：两个 Issue 请求同一本书、又同时批准，没读过的章会各读一遍（jsonl 两份都留，打包取后写的）——别同时批两个
+name: 请试读
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions: {}
+
+jobs:
+  estimate:
+    # 同 request.py decide() 的 pending：别人开的、开的时候没带「批准」
+    if: >-
+      github.event.action == 'opened' &&
+      github.event.issue.author_association != 'OWNER' &&
+      contains(github.event.issue.labels.*.name, '试读请求') &&
+      !contains(github.event.issue.labels.*.name, '批准')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+    env:
+      ISSUE: ${{ github.event.issue.number }}
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"      # 跟本机一致
+
+      # 这一步没有 GH_TOKEN、没有判断模型的 key：--job estimate 只预估，真跑的路径在这里走不到
+      - name: 预估（不调判断模型）
+        id: req
+        run: python tools/request.py --job estimate --comment-file "$RUNNER_TEMP/taster-comment.md"
+
+      - name: 回评论
+        if: ${{ !cancelled() && steps.req.outputs.comment != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMMENT: ${{ steps.req.outputs.comment }}
+        run: gh issue comment "$ISSUE" --body-file "$COMMENT"
+
+      - name: 脚本崩了也回一声
+        if: ${{ failure() && steps.req.outputs.status == '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: >-
+          gh issue comment "$ISSUE" --body
+          "预估脚本出错了，详情见运行日志：$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+  taste:
+    # 仓库主人开的（开的时候没带「批准」——带了的交给随后的 labeled 事件，免得一个 Issue 跑两遍）；或维护者加了「批准」。
+    # 开 Issue 时模板自动打「试读请求」也会发一个 labeled 事件：在这里就筛掉，不让它进排队
+    if: >-
+      contains(github.event.issue.labels.*.name, '试读请求') &&
+      ((github.event.action == 'opened' && github.event.issue.author_association == 'OWNER' &&
+      !contains(github.event.issue.labels.*.name, '批准')) ||
+      (github.event.action == 'labeled' && github.event.label.name == '批准'))
+    runs-on: ubuntu-latest
+    # request.py 试读阶段 100 分钟到点停手，留 30 分钟给在途调用、打包、提交
+    timeout-minutes: 130
+    permissions:
+      contents: write
+      issues: write
+    concurrency:
+      group: taste-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    env:
+      # request.py 用它读本 Issue 的评论，核对批准的是不是预估过的那个键
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ISSUE: ${{ github.event.issue.number }}
+      BRANCH: ${{ github.event.repository.default_branch }}
+      PYTHONIOENCODING: utf-8
+    steps:
+      # 🔴 不给 ref，checkout 取的是「事件发生那一刻」的提交：排队等过上一轮的 run 看不见上一轮刚推的读数，
+      #    同样的章节再花一遍钱。给分支名 → 取开跑时的最新（2026-09-25）
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"      # 跟本机一致
+
+      - name: 试读
+        id: req
+        env:
+          TASTER_API_KEY: ${{ secrets.TASTER_API_KEY }}
+          TASTER_ENDPOINT: ${{ vars.TASTER_ENDPOINT }}
+        run: python tools/request.py --job taste --comment-file "$RUNNER_TEMP/taster-comment.md"
+
+      - name: 提交读数
+        id: push
+        if: ${{ !cancelled() && steps.req.outputs.status != 'ignored' && steps.req.outputs.status != 'changed' }}
+        env:
+          REQ_OUTCOME: ${{ steps.req.outcome }}
+        run: |
+          if [ -z "$(git status --porcelain -- data)" ]; then echo "data/ 没变，不提交"; exit 0; fi
+          # 🔴 build.py 把书名、章名打进日志，这些来自书源页面（谁都能改）：停掉 runner 的命令解析再跑
+          build() {
+            local t rc=0
+            t=$(python -c 'import secrets; print(secrets.token_hex(16))')
+            echo "::stop-commands::$t"
+            python tools/build.py || rc=$?
+            echo "::$t::"
+            return $rc
+          }
+          # 脚本中途崩了也要把已读的存下来（钱已经花了），顺手补打包；打包失败也先提交读数
+          if [ "$REQ_OUTCOME" != "success" ]; then build || echo "打包失败，先只提交读数"; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 读数 jsonl 只追加：推送撞车时两边的行都留
+          echo 'data/**/*.jsonl merge=union' >> .git/info/attributes
+          git add -- data site/data.js
+          git commit -q -m "试读读数（#$ISSUE）"
+          # 撞车（别的 Issue 的试读同时推送）就拉新、rebase、重新打包再推，最多三轮。
+          # 🔴 rebase 里 -X ours 是「远端那边」赢（-X theirs 是这边赢，会悄悄盖掉别人同时手改的 meta / units）。
+          #    读数 jsonl 走 union 两边都留；data.js 反正重新打包（2026-09-25）
+          for i in 1 2 3; do
+            if git push -q origin "HEAD:$BRANCH"; then exit 0; fi
+            echo "推送撞车（第 $i 轮），拉新后 rebase 重试"
+            sleep $((i * 5))
+            git fetch -q origin "$BRANCH"
+            if ! git rebase -q -X ours FETCH_HEAD; then
+              git rebase --abort || true
+              echo "rebase 解不开，不再重试"
+              break
+            fi
+            build || echo "打包失败，先只提交读数"
+            git add -- site/data.js
+            git diff --cached --quiet || git commit -q -m "重新打包（#$ISSUE）"
+          done
+          exit 1
+
+      # 推不上去时读数只在这台一次性的机器上：存成运行附件，维护者合并回仓库，免得再花一遍钱
+      - name: 推不上就存附件
+        id: keep
+        if: ${{ !cancelled() && steps.push.outcome == 'failure' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: taster-data-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            data/
+            site/data.js
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: 回评论
+        if: ${{ !cancelled() && steps.req.outputs.comment != '' }}
+        env:
+          COMMENT: ${{ steps.req.outputs.comment }}
+          PUSH_OUTCOME: ${{ steps.push.outcome }}
+          KEEP_OUTCOME: ${{ steps.keep.outcome }}
+        run: |
+          if [ "$PUSH_OUTCOME" = "failure" ]; then
+            if [ "$KEEP_OUTCOME" = "success" ]; then
+              printf '\n⚠️ 读数没推上仓库，已存成这次运行的附件 `taster-data-%s-%s`（保留 90 天）。维护者把附件里的 data/ 合并回仓库后再加「批准」接着读——不合并就加，已读的章会再花一遍钱。\n' \
+                "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$COMMENT"
+            else
+              printf '\n⚠️ 读数没推上仓库，存附件也没成功，详情见运行日志。维护者处理后再加「批准」标签。\n' >> "$COMMENT"
+            fi
+          fi
+          gh issue comment "$ISSUE" --body-file "$COMMENT"
+
+      - name: 脚本崩了也回一声
+        if: ${{ failure() && steps.req.outputs.status == '' }}
+        run: >-
+          gh issue comment "$ISSUE" --body
+          "试读脚本出错了，详情见运行日志：$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+      - name: 收尾（标签、关 Issue）
+        if: ${{ !cancelled() }}
+        env:
+          STATUS: ${{ steps.req.outputs.status }}
+          PUSH_OUTCOME: ${{ steps.push.outcome }}
+        run: |
+          if [ "$STATUS" = "done" ] && [ "$PUSH_OUTCOME" = "failure" ]; then STATUS=partial; fi
+          case "$STATUS" in
+            done)
+              gh label create "已试读" --color 0E8A16 --description "试读员读完了" 2>/dev/null || true
+              gh issue edit "$ISSUE" --add-label "已试读"
+              gh issue close "$ISSUE" --reason completed ;;
+            ignored) ;;
+            *)
+              # 摘掉「批准」，维护者再加一次就是再跑一轮（labeled 事件只在加上时触发）。
+              # changed（批准后发现请求改过、只重新预估了）也摘：维护者看过新预估再加
+              gh issue edit "$ISSUE" --remove-label "批准" || true ;;
+          esac

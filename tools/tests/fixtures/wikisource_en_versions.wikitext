@@ -1,0 +1,9 @@
+{{versions
+ | title      = Pride and Prejudice
+ | author     = Jane Austen
+ | notes      = A novel by [[w:Jane Austen|Jane Austen]].
+}}
+* [[Pride and Prejudice (1813)|The 1st edition]], published in three volumes in 1813.
+* [[Pride and Prejudice (1817)|The 3rd edition]], published in two volumes in 1817.
+
+[[Category:British novels]]

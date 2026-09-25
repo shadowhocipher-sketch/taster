@@ -18,9 +18,17 @@ def parse_key(key):
     return m.group(1), m.group(2)
 
 
+_RESERVED = re.compile(r"^(CON|PRN|AUX|NUL|COM[0-9¹²³]|LPT[0-9¹²³])(\..*)?$", re.I)
+
+
 def safe_name(rid):
     """编号 → 文件名。只转义 Windows / URL 里有特殊含义的字符，中文原样保留。"""
-    return re.sub(r'[\\/:*?"<>|%]', lambda m: "%%%02X" % ord(m.group()), rid)
+    s = re.sub(r'[\\/:*?"<>|%]', lambda m: "%%%02X" % ord(m.group()), rid)
+    # Windows 设备名（AUX、CON.txt…）当文件名会写进设备而不是文件；首字母转义掉
+    if _RESERVED.match(s):
+        s = "%%%02X%s" % (ord(s[0]), s[1:])
+    # 结尾的点和空格 Windows 会悄悄吃掉，两个不同的编号就撞成一个文件
+    return re.sub(r"[. ]$", lambda m: "%%%02X" % ord(m.group()), s)
 
 
 def data_path(key, ext="jsonl"):
@@ -65,6 +73,26 @@ def ruler_fp(r):
 
 def text_fp(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:8]
+
+
+def latest_reads(key, fp):
+    """data/<来源>/<编号>.jsonl → {章号: 最新一条读数}，只算尺指纹 = fp 的（尺改过的旧记录不可比）。后写的覆盖先写的。"""
+    out, p = {}, data_path(key)
+    if os.path.exists(p):
+        with open(p, encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    r = json.loads(line)
+                    if r.get("尺指纹") == fp:
+                        out[r["n"]] = r
+    return out
+
+
+def is_read(rec, unit):
+    """「读过」全站只有这一个定义：当前尺下这一章有读数，而且章名标签跟目录对得上。
+    build.py 上站、request.py 预估和真跑、taste.py 跳过，都照这个判。
+    🔴 2026-09-25 解析 bug 让第一回丢失、全书错位一格：标签对不上的旧读数挂错了章，不算读过。"""
+    return rec is not None and rec.get("label") == unit.get("label")
 
 
 def chunk(text, size=6000):

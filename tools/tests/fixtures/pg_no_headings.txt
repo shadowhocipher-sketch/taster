@@ -1,0 +1,21 @@
+The Project Gutenberg EBook of A Short Essay, by Someone
+
+*** START OF THIS PROJECT GUTENBERG EBOOK A SHORT ESSAY ***
+
+Produced by A Volunteer
+
+A SHORT ESSAY
+
+There are essays that have no chapters at all. This is one of them. It
+goes on from one paragraph to the next without a single heading, and a
+reader who wants to stop in the middle has to fold the corner of the
+page.
+
+The second paragraph says much the same thing, only more slowly, and
+with a small digression about the weather, which was fine.
+
+The third paragraph ends the essay.
+
+*** END OF THIS PROJECT GUTENBERG EBOOK A SHORT ESSAY ***
+
+This file should be named essay.txt.

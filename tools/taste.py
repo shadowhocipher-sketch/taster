@@ -8,7 +8,8 @@
   python tools/taste.py <键> --max-calls 200               # 单次最多调 200 次（Actions 用来封顶）
 
 一章 = 一次调用，一次带上尺上所有题。
-跳过规则：同一章 + 同一份正文（正文指纹）+ 同一把尺（尺指纹）已有记录 → 不重跑。
+跳过规则：这一章读过（core.is_read：当前尺下有读数、章名标签对得上）而且正文指纹没变 → 不重跑。
+  本机跑会重读「读过但正文变了」的章；Issue 请求（request.py）传 only=，只读批准的那批没读过的章，从不重读。
 读数原样存，不经人手；翻成人话是前端按固定模板做的。
 实际模型 ≠ 尺上钉的模型 → 立刻停，不可比的数据不落盘。
 """
@@ -16,35 +17,41 @@ import argparse, json, os, sys, time
 
 sys.stdout.reconfigure(encoding="utf-8")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from core import data_path, load_json, load_ruler, meta_path, ruler_fp, text_dir, text_fp
+from core import data_path, is_read, latest_reads, load_json, load_ruler, meta_path, ruler_fp, text_dir, text_fp
 
 
-def plan(key, limit=None):
+class JudgeError(RuntimeError):
+    """判断模型那边出的错（接口报错、连不上、模型版本不对）。
+    🔴 原文可能带接口回的原始报文、供应商名、模型 id：request.py 在公开的 Actions 日志和评论里只给固定措辞（2026-09-25）"""
+
+
+def plan(key, limit=None, only=None):
+    """→ (meta, 尺, 尺指纹, 待读 [(章, 正文)], 缺正文的章数)。
+    only：章号集合，只看这几章（request.py 传批准的那批）；limit：只看目录前 N 章。"""
     meta = load_json(meta_path(key)) or sys.exit("没有 %s 的元数据，先跑 fetch.py" % key)
     ruler = load_ruler(meta["ruler"])
-    fp, cut = ruler_fp(ruler), ruler["截断字数"]
+    fp = ruler_fp(ruler)
     units = load_json(os.path.join(text_dir(key), "index.json"), [])[:limit]
-    done = set()
-    log = data_path(key)
-    if os.path.exists(log):
-        for line in open(log, encoding="utf-8"):
-            r = json.loads(line)
-            done.add((r["n"], r["正文指纹"], r["尺指纹"]))
+    if only is not None:
+        units = [u for u in units if u["n"] in only]
+    latest = latest_reads(key, fp)
     todo, missing = [], 0
     for u in units:
         p = os.path.join(text_dir(key), "%03d.txt" % u["n"])
         if not os.path.exists(p):
             missing += 1
             continue
-        text = open(p, encoding="utf-8").read()
-        if (u["n"], text_fp(text), fp) not in done:
+        with open(p, encoding="utf-8") as f:
+            text = f.read()
+        rec = latest.get(u["n"])
+        if not (is_read(rec, u) and rec.get("正文指纹") == text_fp(text)):
             todo.append((u, text))
     return meta, ruler, fp, todo, missing
 
 
-def taste(key, limit=None, dry_run=False, max_calls=None, log=print):
+def taste(key, limit=None, dry_run=False, max_calls=None, log=print, only=None):
     from judge import ask
-    meta, ruler, fp, todo, missing = plan(key, limit)
+    meta, ruler, fp, todo, missing = plan(key, limit, only)
     cut, model = ruler["截断字数"], ruler["模型"]
     if max_calls is not None and len(todo) > max_calls:
         log("⚠️ 待读 %d 章，超过单次上限 %d，这次只读前 %d 章" % (len(todo), max_calls, max_calls))
@@ -61,9 +68,12 @@ def taste(key, limit=None, dry_run=False, max_calls=None, log=print):
     path = data_path(key)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     for u, text in todo:
-        out, ms = ask(text[:cut], questions, model=model)
+        try:
+            out, ms = ask(text[:cut], questions, model=model)
+        except Exception as e:
+            raise JudgeError(str(e)) from e
         if out.get("model") != model:
-            raise RuntimeError("实际模型 %s ≠ 尺上钉的 %s，停。不可比的数据不落盘" % (out.get("model"), model))
+            raise JudgeError("实际模型 %s ≠ 尺上钉的 %s，停。不可比的数据不落盘" % (out.get("model"), model))
         rec = {
             "utc": time.strftime("%Y-%m-%d %H:%MZ", time.gmtime()),
             "n": u["n"], "label": u["label"], "title": u["title"], "url": u.get("url"),

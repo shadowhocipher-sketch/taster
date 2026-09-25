@@ -1,0 +1,56 @@
+# 把 site/ 原样发布到 GitHub Pages（纯静态、零依赖、不构建）。
+# 🔴 「请试读」用 GITHUB_TOKEN 推的提交不会触发 push 事件（GitHub 防递归），
+#    所以另挂 workflow_run：试读跑完就重新发布一次（2026-09-25）
+name: 发布站点
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/pages.yml"
+  workflow_run:
+    workflows: ["请试读"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # 🔴 试读 run 以 failure 收场也可能已经推了读数（request.py 崩了照样提交；推完后评论、收尾步骤失败）：
+    #    只认 success 的话，花钱读出来的数一直不上站。发布就是把 main 的 site/ 原样再发一遍，多发无害（2026-09-25）
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success' ||
+      github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      # 假书源只给本机开发用（app.js 也只在 localhost 认 ?mock=1），线上不带
+      - run: rm -f site/mock-connectors.js
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
