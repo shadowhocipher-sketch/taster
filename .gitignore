@@ -1,0 +1,11 @@
+# 🔴 正文永远不进仓库（公版也不放——站上链原文就够了；有版权的更不能放）
+texts/
+
+# 密钥
+.env
+*.env
+
+# 本地
+__pycache__/
+.claude/settings.local.json
+.claude/session-logs/
