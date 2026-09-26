@@ -30,7 +30,7 @@ import build as build_mod
 import fetch as fetch_mod
 import taste as taste_mod
 
-SITE = "https://keepexperiencing.github.io/taster/"
+SITE = "https://shadowhocipher-sketch.github.io/taster/"
 REQUEST_LABEL, APPROVE_LABEL = "试读请求", "批准"
 MAX_CALLS = 200            # 单次上限（ARCHITECTURE §5）
 TIME_BUDGET_MIN = 100      # workflow 的 timeout-minutes 是 130：到点先停手，已读的还来得及提交

@@ -2,7 +2,7 @@
 
 **搜一本书，先看每一章读起来怎么样。只有读数，没有观点。**
 
-→ **在线使用：https://keepexperiencing.github.io/taster/**
+→ **在线使用：https://shadowhocipher-sketch.github.io/taster/**
 
 像订酒店先看评分：你搜一个书名、题材，或者一种感受（「揪心」「好笑」「停不下来」），Taster 同时去查各家公开书库，把结果排成统一的卡片。已经试读过的书，每一章都有一组读数——
 

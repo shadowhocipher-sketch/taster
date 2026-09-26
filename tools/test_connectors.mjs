@@ -406,7 +406,7 @@ async function offline() {
 }
 
 // ---------------------------------------------------------------- 在线
-const ORIGIN = "https://keepexperiencing.github.io";
+const ORIGIN = "https://shadowhocipher-sketch.github.io";
 const UA = "Taster/0.2 (https://github.com/shadowhocipher-sketch/taster; connector test; few requests)";
 const LIVE = {
   "wikisource-zh": ["三国演义", "水浒"], "wikisource-en": ["Pride and Prejudice", "Jane Austen"],
