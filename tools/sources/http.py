@@ -3,7 +3,7 @@
 import email.utils, json, math, time, urllib.error, urllib.request
 from datetime import datetime, timezone
 
-UA = {"User-Agent": "Taster/0.2 (https://github.com/Keepexperiencing/taster; reading-data research; slow, backs off on 429)"}
+UA = {"User-Agent": "Taster/0.2 (https://github.com/shadowhocipher-sketch/taster; reading-data research; slow, backs off on 429)"}
 
 
 def retry_after(value, default=30):

@@ -18,7 +18,7 @@ const ALIAS = {
   "跟得上": ["好懂", "最好懂", "易读", "不迷路", "入门"],
   "喜欢主角": ["主角", "人设"],
 };
-const REPO = "https://github.com/Keepexperiencing/taster";
+const REPO = "https://github.com/shadowhocipher-sketch/taster";
 const KEY_RE = /^[a-z][a-z0-9-]{1,30}:.{1,200}$/;      // 同 tools/core.py
 // 能试读的来源和编号规则，同 tools/request.py（ARCHITECTURE.md §1）。前端只是先挡一道，真正把关在 request.py
 const TASTE_SRC = ["wikisource-zh", "wikisource-en", "gutenberg"];

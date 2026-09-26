@@ -236,7 +236,7 @@ def marked_key(event):
             e.get("GITHUB_API_URL") or "https://api.github.com", repo, n, page)
         req = urllib.request.Request(url, headers={
             "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
-            "User-Agent": "Taster (https://github.com/Keepexperiencing/taster)"})
+            "User-Agent": "Taster (https://github.com/shadowhocipher-sketch/taster)"})
         with urllib.request.urlopen(req, timeout=30) as r:
             items = json.load(r)
         for c in items:                                    # 按时间先后排，后面的覆盖前面的

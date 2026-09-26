@@ -181,7 +181,7 @@
   const WS_REF = /encyclop|cyclopæ?a?edia|dictionary|gazetteer|magazine|monthly|weekly|quarterly|review|journal|gazette|百科|[辭辞詞词字]典|[類类]書|[類类]书|雜誌|杂志|期刊|月刊|[週周]刊|日[報报]/i;
   // 维基媒体的 User-Agent 政策要求标明身份；浏览器里改不了 User-Agent，官方给的替代就是 Api-User-Agent。
   // 代价：每个不同的请求先多一次 OPTIONS 预检（回应不带 Max-Age，浏览器只缓存几秒）
-  const WS_UA = { "Api-User-Agent": "Taster/0.2 (https://github.com/Keepexperiencing/taster)" };
+  const WS_UA = { "Api-User-Agent": "Taster/0.2 (https://github.com/shadowhocipher-sketch/taster)" };
   const fold = s => (W.zhVariants ? W.zhVariants.toSimp(s) : String(s)).normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
   const STOP = new Set(["the", "and", "of", "an", "in", "on", "to", "at", "by", "for", "with", "from", "or", "de", "la", "le", "el", "der", "die", "das", "und"]);
   function terms(q) {

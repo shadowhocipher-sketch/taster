@@ -293,7 +293,7 @@ async function offline() {
   const lk = seen.filter(u => u.includes("generator=links"));
   ok(lk.length === 1 && P(lk[0], "titles") === "三國演義 (消歧義)|三國志" && P(lk[0], "tltemplates"), "两种消歧义页（标题认的、页面属性认的）一次请求展开");
   const wsH = seen.filter(u => u.includes("wikisource.org")).map(u => JSON.stringify(heads.get(u)));
-  ok(wsH.length && wsH.every(h => h === JSON.stringify([["api-user-agent", "Taster/0.2 (https://github.com/Keepexperiencing/taster)"]])),
+  ok(wsH.length && wsH.every(h => h === JSON.stringify([["api-user-agent", "Taster/0.2 (https://github.com/shadowhocipher-sketch/taster)"]])),
     "维基文库每个请求都带 Api-User-Agent，别的头不带，实际 " + [...new Set(wsH)].join(" / "));
 
   seen.length = 0;
@@ -407,7 +407,7 @@ async function offline() {
 
 // ---------------------------------------------------------------- 在线
 const ORIGIN = "https://keepexperiencing.github.io";
-const UA = "Taster/0.2 (https://github.com/Keepexperiencing/taster; connector test; few requests)";
+const UA = "Taster/0.2 (https://github.com/shadowhocipher-sketch/taster; connector test; few requests)";
 const LIVE = {
   "wikisource-zh": ["三国演义", "水浒"], "wikisource-en": ["Pride and Prejudice", "Jane Austen"],
   gutenberg: ["Pride and Prejudice", "水浒"], ctext: ["三国演义", "水浒"],

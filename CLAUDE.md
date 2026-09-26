@@ -8,5 +8,5 @@
 - **只出数据和翻译，没有观点**。翻译 = `site/app.js` 里 `reading()` 的固定模板。不许加评语、不许替模型写解读——Claude 也不许在对话里替读数下结论（同 `Dev/Ops/network/走查.md` 的规矩）。
 - **版权**：公版书（维基文库、Gutenberg）可链原文；有版权的只放读数，正文不进仓库。拉书只走官方 API，不爬盗版站。判断拿不准时用 `copyright` skill。
 - **花钱**：跑 Jev 前先 `--dry-run` 报调用次数；大批量（整本以上）先问 Sam。
-- **GitHub**：`Keepexperiencing/taster`，公开，边建边推（Sam 09-25 授权）。TypeSafe MCA 已读：§4.2 输出归我们 → 可公开；§2.3(a) 不做任意文本打分。
+- **GitHub**：`shadowhocipher-sketch/taster`（09-26 从旧号 Keepexperiencing 转来，旧地址自动跳转），公开，边建边推（Sam 09-25 授权）。TypeSafe MCA 已读：§4.2 输出归我们 → 可公开；§2.3(a) 不做任意文本打分。
 - `.stignore` 忽略 `.git`：仓库历史只在建仓那台机上，跨机靠 GitHub。

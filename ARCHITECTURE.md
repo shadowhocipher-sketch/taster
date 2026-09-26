@@ -95,7 +95,7 @@ window.TASTER = {
 
 - Issue 表单 `.github/ISSUE_TEMPLATE/taste.yml`：字段 id `key`（资源键，必填）、`type`（下拉，目前只有「小说」）；自动打标签 `试读请求`。
 - 前端「请试读」按钮 = 预填链接：
-  `https://github.com/Keepexperiencing/taster/issues/new?template=taste.yml&title=试读：<书名>&key=<资源键>`（都做 encodeURIComponent）
+  `https://github.com/shadowhocipher-sketch/taster/issues/new?template=taste.yml&title=试读：<书名>&key=<资源键>`（都做 encodeURIComponent）
 - 谁能触发真跑：仓库主人开的 Issue 直接跑；别人开的，等主人加标签 `批准` 再跑（只有维护者能加标签——这就是花钱闸门）。
 - `taste.yml` 分两个 job：
   - `estimate`：外人开的 Issue → 只预估（不调模型；正文不落盘，但 Gutenberg、维基文库单页作品要把全文读进内存才切得出目录），没有密钥、只读仓库、不进排队组。
