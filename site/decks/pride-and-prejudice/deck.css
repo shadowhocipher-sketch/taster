@@ -1,0 +1,66 @@
+/* Taster deck · 样式（跟随站内 light/dark 变量，幻灯片版式） */
+#decks { display: flex; flex-direction: column; gap: 18px; }
+.slide { display: none; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 28px 30px; min-height: 420px; }
+.slide.on { display: block; animation: slide-in .25s ease; }
+@keyframes slide-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+.slide h2 { margin: 0 0 6px; font-size: 22px; }
+.slide .kicker { font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 14px; }
+.slide .byline { font-size: 12px; color: var(--ink-3); margin-top: 18px;
+  border-top: 1px solid var(--line); padding-top: 10px; }
+
+/* 顶栏：导航 + 计数 */
+.deckbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.deckbar .home { font-size: 14px; }
+#deck-count { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+#deck-dots { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
+#deck-dots button { width: 30px; height: 26px; border: 1px solid var(--grid); background: var(--surface);
+  border-radius: 6px; font-size: 11px; color: var(--ink-2); cursor: pointer; }
+#deck-dots button:hover { border-color: var(--axis); }
+#deck-dots button.on { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+
+/* 人物关系图 */
+.cast { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 14px; }
+.cast .who { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.cast .who b { display: block; font-size: 14px; }
+.cast .who span { font-size: 12px; color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--ink-2); margin-top: 12px; }
+
+/* 心电图与色带（读数未跑 → 占位；有数据 → deck.js 画图替换） */
+.chart-slot { margin-top: 14px; background: var(--surface-2); border: 1px dashed var(--axis);
+  border-radius: 8px; padding: 26px 16px; text-align: center; color: var(--ink-2); font-size: 13px; }
+.chart-slot b { display: block; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+.chart-slot svg { width: 100%; height: auto; display: block; }
+.chart-slot.filled { border-style: solid; padding: 14px 10px; text-align: left; }
+
+/* 感受色带：61 格 */
+.fband { display: flex; flex-wrap: nowrap; gap: 2px; overflow-x: auto; padding: 4px 0; }
+.fcell { flex: 1 0 12px; height: 26px; border-radius: 3px; font-size: 0; position: relative; }
+.fcell:hover { outline: 2px solid var(--focus); outline-offset: 1px; }
+.cell-e1 { background: var(--e1); } .cell-e2 { background: var(--e2); } .cell-e3 { background: var(--e3); }
+.cell-e4 { background: var(--e4); } .cell-e5 { background: var(--e5); } .cell-e6 { background: var(--e6); }
+.cell-e7 { background: var(--e7); } .cell-u { background: var(--eo); }
+.fl { display: inline-flex; align-items: center; gap: 4px; }
+.fl i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.fcell { white-space: nowrap; }
+
+/* 高光卡 */
+.peaks { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 14px; }
+.peaks .peak { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+.peaks .peak .ch { font-size: 12px; color: var(--ink-3); }
+.peaks .peak p { font-size: 14px; margin: 6px 0 0; }
+
+/* 路径三选一 */
+.paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
+.paths .path { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--surface-2); }
+.paths .path b { display: block; margin-bottom: 4px; }
+.paths .path span { font-size: 13px; color: var(--ink-2); }
+
+.warn { background: var(--surface-2); border-left: 3px solid var(--frame); padding: 8px 12px;
+  font-size: 13px; color: var(--ink-2); border-radius: 0 6px 6px 0; margin: 10px 0; }
+.quoteline { font-size: 17px; line-height: 1.7; margin: 18px 0; }
+.hint { font-size: 13px; color: var(--ink-3); }
+
+@media (max-width: 640px) { .slide { padding: 20px 16px; min-height: 360px; } }
+@media (prefers-reduced-motion: reduce) { .slide.on { animation: none; } }
