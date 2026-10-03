@@ -50,6 +50,7 @@ python tools/fetch.py wikisource-zh:三國演義 --limit 10   # 拉正文到 tex
 python tools/taste.py wikisource-zh:三國演義 --dry-run    # 先看要调几次
 python tools/taste.py wikisource-zh:三國演義 --limit 10   # 试读（需要 TASTER_API_KEY）
 python tools/build.py                                     # 打包 site/data.js
+python tools/check.py                                     # 红线检查（每个 PR 上自动跑）
 python -m http.server 8765 --directory site               # 打开 http://localhost:8765
 ```
 

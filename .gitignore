@@ -9,3 +9,9 @@ texts/
 __pycache__/
 .claude/settings.local.json
 .claude/session-logs/
+
+# 项目笔记（进度、调研、商业想法）：只走 Syncthing，不进公开仓库
+笔记/
+
+# WorkBuddy 的工作日志（工具私有目录）
+.workbuddy-ai/

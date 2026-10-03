@@ -1,0 +1,44 @@
+# 每个 PR 自动跑：单元测试、连接器离线检查、红线检查（tools/check.py）。不联网查书库、不调判断模型、不花钱。
+# 审查第一层（2026-10-03 定）：机器查得出的这里查；数据还是观点、编辑导读标没标清，归人审（PR 模板的检查表）。
+name: 检查
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+
+      - name: 单元测试
+        run: python -m unittest discover -s tools/tests
+
+      - name: 连接器离线检查
+        run: node tools/test_connectors.mjs --offline
+
+      - name: 红线检查
+        run: python tools/check.py

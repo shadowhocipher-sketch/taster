@@ -26,7 +26,8 @@ def model_version(model_id):
     return m.group(1) if m else "?"
 
 
-def build():
+def bundle():
+    """→ site/data.js 里的那个对象（不写文件）。check.py 拿它核对 data.js 是不是最新的。"""
     rulers, shelf, skipped = {}, [], 0
     for mp in sorted(glob.glob(os.path.join(ROOT, "data", "*", "*.meta.json"))):
         meta = load_json(mp)
@@ -57,12 +58,15 @@ def build():
         shelf.append(pub)
         print("%s《%s》：%d 章，已试读 %d" % (key, meta["title"], len(units), len(latest)))
 
-    bundle = {"built": time.strftime("%Y-%m-%d %H:%MZ", time.gmtime()), "rulers": rulers, "shelf": shelf}
-    out = os.path.join(ROOT, "site", "data.js")
-    with open(out, "w", encoding="utf-8", newline="\n") as f:
-        f.write("window.TASTER = " + json.dumps(bundle, ensure_ascii=False, separators=(",", ":")) + ";\n")
     print("→ site/data.js（%d 个资源%s）" % (len(shelf), "；%d 个没读过的没上架" % skipped if skipped else ""))
-    return bundle
+    return {"built": time.strftime("%Y-%m-%d %H:%MZ", time.gmtime()), "rulers": rulers, "shelf": shelf}
+
+
+def build():
+    b = bundle()
+    with open(os.path.join(ROOT, "site", "data.js"), "w", encoding="utf-8", newline="\n") as f:
+        f.write("window.TASTER = " + json.dumps(b, ensure_ascii=False, separators=(",", ":")) + ";\n")
+    return b
 
 
 if __name__ == "__main__":
