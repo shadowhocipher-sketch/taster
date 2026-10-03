@@ -1,12 +1,16 @@
 # Taster 试读员 · 给 Claude 的交接
 
-流程和规矩看 `README.md`，接口约定看 `ARCHITECTURE.md`。这里只记 Sam 拍板过的事（2026-09-25）：
+流程和规矩看 `README.md`，接口约定看 `ARCHITECTURE.md`。这里只记 Sam 拍板过的事（2026-09-25 起）：
 
 - **是什么**：公开放 GitHub 的静态站。搜关键词 → 资源 + 每章读数。目的是替人省下找书、找资源、判断「该看什么」的时间。以后不只书（课程、论文……），每类资源一把尺。
 - **名字**：Taster 试读员（2026-09-25 定）。名字里不带 Jev——不绑死供应商，也因为 TypeSafe 客户协议 §16.4 不授权用对方名字。站上只写「第三方判断模型 + 版本号」。
 - **形态**：像 Booking.com——背后连很多书库和网络资源，统一卡片，试读员读数当点评。三国只是第一个接进来的书。
-- **只出数据和翻译，没有观点**。翻译 = `site/app.js` 里 `reading()` 的固定模板。不许加评语、不许替模型写解读——Claude 也不许在对话里替读数下结论（同 `Dev/Ops/network/走查.md` 的规矩）。
-- **版权**：公版书（维基文库、Gutenberg）可链原文；有版权的只放读数，正文不进仓库。拉书只走官方 API，不爬盗版站。判断拿不准时用 `copyright` skill。
-- **花钱**：跑 Jev 前先 `--dry-run` 报调用次数；大批量（整本以上）先问 Sam。
-- **GitHub**：`shadowhocipher-sketch/taster`（09-26 从旧号 Keepexperiencing 转来，github.com 旧地址自动跳转，但 github.io 站点地址不跳转，已全部改成新地址），公开，边建边推（Sam 09-25 授权）。TypeSafe MCA 已读：§4.2 输出归我们 → 可公开；§2.3(a) 不做任意文本打分。
-- `.stignore` 忽略 `.git`：仓库历史只在建仓那台机上，跨机靠 GitHub。
+- **读数区只出数据和翻译，没有观点**。翻译 = `site/app.js` 里 `reading()` 的固定模板。读数区不许加评语、不许替模型写解读——Claude 也不许在对话里替读数下结论（同 `Dev/Ops/network/走查.md` 的规矩）。
+- **编辑导读区**（2026-10-03 放开）：人写的导读、人物、看点、荐书可以上站，但必须：和读数分开放、标明「编辑导读」；不借读数下结论；事实性说法有来源，没有就删；有联盟或购买链接的页面写披露语，可下载的文件（PPT / PDF）里不放联盟链接；不用有版权书的正文或大段引文。
+- **版权**：公版书（维基文库、Gutenberg）可链原文；有版权的只放读数，正文不进仓库。拉书只走官方 API，不爬盗版站。判断拿不准时用 `copyright` skill。⚠️ 跟 README / ARCHITECTURE「有版权的只列出、不试读」矛盾，等 Sam 定；定之前按「不试读」做。
+- **花钱**：判断模型只走「请试读」Issue（GitHub Actions）跑，谁都不在本机跑。先 `--dry-run` 报调用次数；Sam 明说「批准跑 X，N 次」并亲自开 Issue——「继续」不算批准（2026-10-03）。
+- **GitHub**：`shadowhocipher-sketch/taster`（09-26 从旧号 Keepexperiencing 转来，github.com 旧地址自动跳转，但 github.io 站点地址不跳转，已全部改成新地址），公开。TypeSafe MCA 已读：§4.2 输出归我们 → 可公开；§2.3(a) 不做任意文本打分。
+- **改动走 PR**（2026-10-03，取代 09-25 的「边建边推」）：开分支 → 推送 → 开 PR → 「检查」工作流（`tools/check.py`）→ Claude 审查 → Sam 点头 → Claude 合并（Sam 不用自己去 GitHub 点按钮）。检查没过不合；Sam 没点头不合。谁都不直接推 `main`；WorkBuddy 不合并；Claude 和 WorkBuddy 都不开「请试读」Issue。分支前缀：Claude `claude/`，WorkBuddy `wb/`。
+- **分工**（2026-10-03）：按后果分，不按人分。不花钱、不改仓库的（调研、拉书、dry-run、预览、测试）谁都能做；改代码谁都能写，但走 PR；花钱只走上面那个闸门；拍板只有 Sam，规矩由 Claude 写进本文件。WorkBuddy 量大的活多做（调研、导读和 PPT、配图、代码初稿），Claude 审查、定稿、守规矩。
+- **同步**：整个 `Dev` 是一条 Syncthing，G10 / GPD / WIN4 三机同步，`.git` 不同步——每台机器的 git 各自接 GitHub，开工 `git pull`，收工推送。WorkBuddy 和 Claude 都在 WIN4：本文件夹是 Claude 的工作区，WorkBuddy 在 Dev 外的 `C:\Work\taster` 里改代码，不在这里改文件、跑 git。
+- **笔记**：`笔记/`（`.gitignore` 挡住，跟 Dev 一起同步）。`进度.md` Claude 写、每次覆盖，开工先读；WorkBuddy 一件事一个新文件，开头写「问题 / 结论 / 来源」；一个文件只有一方写。商业想法（联盟、抽成、定价）只放笔记，不进公开仓库。
