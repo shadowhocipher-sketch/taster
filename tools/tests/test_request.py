@@ -454,7 +454,7 @@ class TestHandle(Sandbox):
         status, _ = self.handle(event("opened", "OWNER", key="wikisource-en:pride and Prejudice"))
         self.assertEqual(status, "done")
         self.assertEqual(len(self.records("wikisource-en:Pride and Prejudice")), 3)
-        self.assertEqual(os.listdir(os.path.join(self.tmp, "data", "wikisource-en")),
+        self.assertEqual(sorted(os.listdir(os.path.join(self.tmp, "data", "wikisource-en"))),
                          ["Pride and Prejudice.jsonl", "Pride and Prejudice.meta.json",
                           "Pride and Prejudice.units.json"])
         # 再用另一个别名请求：同一份数据，一章都不重读
