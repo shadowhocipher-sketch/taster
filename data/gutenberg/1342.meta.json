@@ -1,0 +1,16 @@
+{
+ "title": "Pride and Prejudice",
+ "author": "Jane Austen",
+ "lang": "en",
+ "license": "公版",
+ "source_name": "Project Gutenberg",
+ "read_url": "https://www.gutenberg.org/ebooks/1342",
+ "key": "gutenberg:1342",
+ "source": "gutenberg",
+ "id": "1342",
+ "type": "小说",
+ "ruler": "novel_v1",
+ "tags": [],
+ "added": "2026-10-03",
+ "units_total": 61
+}
